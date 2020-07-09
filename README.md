@@ -77,3 +77,83 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## -- 02 Model Factories in Laravel --
+
+ - cmd: `php artisan make:model Post -m`
+ - cmd: `php artisan make:factory PostFactory`
+ - cmd: `php artisan make:seeder PostTableSeeder`
+ - Modify customize at AppServiceProvider.php  in project\app\Providers
+
+ - Setting up Migration
+ - Open your posts table migration file in database/migrations/create_posts_table.php and change the up method to the following:
+```
+    public function up()
+    {
+        Schema::create('posts', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description');
+            $table->timestamps();
+        });
+    }
+```
+ - It will create a new factory at database/factories/PostFactory.php Here are the completed contents of the PostFactory.php file:
+```
+    <?php
+
+    /** @var \Illuminate\Database\Eloquent\Factory $factory */
+
+    use App\Post;
+    use Faker\Generator as Faker;
+
+    $factory->define(Post::class, function (Faker $faker) {
+        return [
+            'title' => $faker->sentence(5),
+            'description' => $faker->text(),
+        ];
+    });
+
+```
+
+ - Now open `database/seeder/PostTableSeeder.php` and modify its run method to the following as well:
+```
+    <?php
+    use Illuminate\Database\Seeder;
+    class PostTableSeeder extends Seeder
+    {
+        /**
+         * Run the database seeds.
+         * @return void
+         */
+        public function run()
+        {
+           factory('App\Post', 20)->create();
+        }
+    }
+```
+ - Now that we have created our table seeds, go to `database/seeds/DatabaseSeeder.php` file and modify its up method to the following:
+```
+<?php
+
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+   /**
+    * Seed the application's database.
+    *
+    * @return void
+    */
+   public function run()
+   {
+       // $this->call(UserSeeder::class);
+       $this->call(PostTableSeeder::class);
+   }
+}
+```
+ - cmd: `php artisan migrate`
+ - cmd: `php artisan db:seed`
+ - PostTableSeeder.php will create 20 dummy Name.
+ - Now check in phpmyadmin database
+
